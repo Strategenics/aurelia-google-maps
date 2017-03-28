@@ -406,7 +406,14 @@ define(["require", "exports", "aurelia-dependency-injection", "aurelia-templatin
                     var addedMarkers = this.markers.slice(-splice.addedCount);
                     for (var _c = 0, addedMarkers_1 = addedMarkers; _c < addedMarkers_1.length; _c++) {
                         var addedMarker = addedMarkers_1[_c];
-                        this.renderMarker(addedMarker);
+                        var newMarker = void 0;
+                        if (isAddressMarker(addedMarker)) {
+                            newMarker = this.addressMarkerToMarker(addedMarker);
+                        }
+                        else {
+                            newMarker = addedMarker;
+                        }
+                        this.renderMarker(newMarker);
                     }
                 }
             }
