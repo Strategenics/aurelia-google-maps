@@ -322,7 +322,7 @@ export class GoogleMaps {
      */
     addressMarkerToMarker(marker: AddressMarker): Promise<LatLongMarker> {
         return this.geocode(marker.address).then(firstResults => {
-            return { 
+            return {
                 ... marker,
                 latitude: firstResults.geometry.location.lat(),
                 longitude: firstResults.geometry.location.lng(),
@@ -581,26 +581,19 @@ export class GoogleMaps {
             if (splice.addedCount) {
                 let addedMarkers = this.markers.slice(-splice.addedCount);
 
-                for (let addedMarker of addedMarkers) {
-                    let newMarker;
-                    if (isAddressMarker(addedMarker)) {
-                        this.addressMarkerToMarker(addedMarker).then(result => {
-                            this.renderMarker(result).then(() => {
-                                if (result != null) {
-                                    this.validMarkers.push(result);
-                                    this.taskQueue.queueTask(() => {
-                                        this.zoomToMarkerBounds();
-                                    });
-                                }
-                            });
-                            this.taskQueue.queueTask(() => {
-                                this.zoomToMarkerBounds();
-                            });
-                        });
-                    } else {
-                        this.renderMarker(addedMarker);
-                    }
-                }
+                Promise.all(addedMarkers.map(am => {
+                                return isAddressMarker(am) ? this.addressMarkerToMarker(am) : am;
+                            })
+                ).then(result => {
+                           Promise.all(result.map((r: LatLongMarker) => {
+                               return this.renderMarker(r);
+                           })).then(() => {
+                               this.taskQueue.queueTask(() => {
+                                   this.zoomToMarkerBounds();
+                               });
+                           });
+                       }
+                );
             }
         }
 
@@ -634,7 +627,7 @@ export class GoogleMaps {
 
             this.map.fitBounds(bounds);
             let listener = google.maps.event.addListener(this.map, 'idle', () => {
-                if (this.map.getZoom() > this.zoom) 
+                if (this.map.getZoom() > this.zoom)
                     this.map.setZoom(this.zoom);
                 google.maps.event.removeListener(listener);
             });
