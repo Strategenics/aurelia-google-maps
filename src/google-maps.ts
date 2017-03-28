@@ -584,12 +584,12 @@ export class GoogleMaps {
                 for (let addedMarker of addedMarkers) {
                     let newMarker;
                     if (isAddressMarker(addedMarker)) {
-                        newMarker = this.addressMarkerToMarker(addedMarker);
+                        this.addressMarkerToMarker(addedMarker).then(result => {
+                            this.renderMarker(result);
+                        });
                     } else {
-                        newMarker = addedMarker;
+                        this.renderMarker(addedMarker);
                     }
-
-                    this.renderMarker(newMarker);
                 }
             }
         }

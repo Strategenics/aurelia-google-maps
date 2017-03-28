@@ -408,12 +408,13 @@ define(["require", "exports", "aurelia-dependency-injection", "aurelia-templatin
                         var addedMarker = addedMarkers_1[_c];
                         var newMarker = void 0;
                         if (isAddressMarker(addedMarker)) {
-                            newMarker = this.addressMarkerToMarker(addedMarker);
+                            this.addressMarkerToMarker(addedMarker).then(function (result) {
+                                _this.renderMarker(result);
+                            });
                         }
                         else {
-                            newMarker = addedMarker;
+                            this.renderMarker(addedMarker);
                         }
-                        this.renderMarker(newMarker);
                     }
                 }
             }
