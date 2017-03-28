@@ -416,6 +416,9 @@ var GoogleMaps = (function () {
                     if (isAddressMarker(addedMarker)) {
                         this.addressMarkerToMarker(addedMarker).then(function (result) {
                             _this.renderMarker(result);
+                            _this.taskQueue.queueTask(function () {
+                                _this.zoomToMarkerBounds();
+                            });
                         });
                     }
                     else {

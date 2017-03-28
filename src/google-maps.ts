@@ -586,6 +586,9 @@ export class GoogleMaps {
                     if (isAddressMarker(addedMarker)) {
                         this.addressMarkerToMarker(addedMarker).then(result => {
                             this.renderMarker(result);
+                            this.taskQueue.queueTask(() => {
+                                this.zoomToMarkerBounds();
+                            });
                         });
                     } else {
                         this.renderMarker(addedMarker);

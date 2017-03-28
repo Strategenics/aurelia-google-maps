@@ -436,6 +436,9 @@ System.register(["aurelia-dependency-injection", "aurelia-templating", "aurelia-
                                 if (isAddressMarker(addedMarker)) {
                                     this.addressMarkerToMarker(addedMarker).then(function (result) {
                                         _this.renderMarker(result);
+                                        _this.taskQueue.queueTask(function () {
+                                            _this.zoomToMarkerBounds();
+                                        });
                                     });
                                 }
                                 else {
