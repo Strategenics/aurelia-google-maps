@@ -585,7 +585,14 @@ export class GoogleMaps {
                     let newMarker;
                     if (isAddressMarker(addedMarker)) {
                         this.addressMarkerToMarker(addedMarker).then(result => {
-                            this.renderMarker(result);
+                            this.renderMarker(result).then(() => {
+                                if (result != null) {
+                                    this.validMarkers.push(result);
+                                    this.taskQueue.queueTask(() => {
+                                        this.zoomToMarkerBounds();
+                                    });
+                                }
+                            });
                             this.taskQueue.queueTask(() => {
                                 this.zoomToMarkerBounds();
                             });

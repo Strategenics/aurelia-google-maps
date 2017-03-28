@@ -409,7 +409,14 @@ define(["require", "exports", "aurelia-dependency-injection", "aurelia-templatin
                         var newMarker = void 0;
                         if (isAddressMarker(addedMarker)) {
                             this.addressMarkerToMarker(addedMarker).then(function (result) {
-                                _this.renderMarker(result);
+                                _this.renderMarker(result).then(function () {
+                                    if (result != null) {
+                                        _this.validMarkers.push(result);
+                                        _this.taskQueue.queueTask(function () {
+                                            _this.zoomToMarkerBounds();
+                                        });
+                                    }
+                                });
                                 _this.taskQueue.queueTask(function () {
                                     _this.zoomToMarkerBounds();
                                 });
