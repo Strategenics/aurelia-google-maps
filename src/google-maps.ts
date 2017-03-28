@@ -582,7 +582,14 @@ export class GoogleMaps {
                 let addedMarkers = this.markers.slice(-splice.addedCount);
 
                 for (let addedMarker of addedMarkers) {
-                    this.renderMarker(addedMarker);
+                    let newMarker;
+                    if (isAddressMarker(addedMarker)) {
+                        newMarker = this.addressMarkerToMarker(addedMarker);
+                    } else {
+                        newMarker = addedMarker;
+                    }
+
+                    this.renderMarker(newMarker);
                 }
             }
         }
