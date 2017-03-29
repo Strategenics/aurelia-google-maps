@@ -387,53 +387,21 @@ var GoogleMaps = (function () {
     };
     GoogleMaps.prototype.markerCollectionChange = function (splices) {
         var _this = this;
-        if (!splices.length) {
-            return;
-        }
-        for (var _i = 0, splices_1 = splices; _i < splices_1.length; _i++) {
-            var splice = splices_1[_i];
-            if (splice.removed.length) {
-                for (var _a = 0, _b = splice.removed; _a < _b.length; _a++) {
-                    var removedObj = _b[_a];
-                    for (var markerIndex in this._renderedMarkers) {
-                        if (this._renderedMarkers.hasOwnProperty(markerIndex)) {
-                            var renderedMarker = this._renderedMarkers[markerIndex];
-                            if (renderedMarker.position.lat().toFixed(12) === removedObj.latitude.toFixed(12) &&
-                                renderedMarker.position.lng().toFixed(12) === removedObj.longitude.toFixed(12)) {
-                                renderedMarker.setMap(null);
-                                this._renderedMarkers.splice(markerIndex, 1);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            if (splice.addedCount) {
-                var addedMarkers = this.markers.slice(-splice.addedCount);
-                for (var _c = 0, addedMarkers_1 = addedMarkers; _c < addedMarkers_1.length; _c++) {
-                    var addedMarker = addedMarkers_1[_c];
-                    var newMarker = void 0;
-                    if (isAddressMarker(addedMarker)) {
-                        this.addressMarkerToMarker(addedMarker).then(function (result) {
-                            _this.renderMarker(result).then(function () {
-                                if (result != null) {
-                                    _this.validMarkers.push(result);
-                                    _this.taskQueue.queueTask(function () {
-                                        _this.zoomToMarkerBounds();
-                                    });
-                                }
-                            });
-                            _this.taskQueue.queueTask(function () {
-                                _this.zoomToMarkerBounds();
-                            });
-                        });
-                    }
-                    else {
-                        this.renderMarker(addedMarker);
-                    }
-                }
-            }
-        }
+        this._renderedMarkers.forEach(function (marker) {
+            marker.setMap(null);
+        });
+        this._renderedMarkers = [];
+        Promise.all(this.markers.map(function (am) {
+            return isAddressMarker(am) ? _this.addressMarkerToMarker(am) : am;
+        })).then(function (result) {
+            Promise.all(result.map(function (r) {
+                return _this.renderMarker(r);
+            })).then(function () {
+                _this.taskQueue.queueTask(function () {
+                    _this.zoomToMarkerBounds();
+                });
+            });
+        });
         this.taskQueue.queueTask(function () {
             _this.zoomToMarkerBounds();
         });

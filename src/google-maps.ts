@@ -548,54 +548,24 @@ export class GoogleMaps {
      * @param splices
      */
     markerCollectionChange(splices: any) {
-        if (!splices.length) {
-            // Collection changed but the splices didn't
-            return;
-        }
+        this._renderedMarkers.forEach(marker => {
+            marker.setMap(null);
+        });
+        this._renderedMarkers = [];
 
-        for (let splice of splices) {
-            if (splice.removed.length) {
-                // Iterate over all the removed markers
-                for (let removedObj of splice.removed) {
-                    // Iterate over all the rendered markers to find the one to remove
-                    for (let markerIndex in this._renderedMarkers) {
-                        if (this._renderedMarkers.hasOwnProperty(markerIndex)) {
-                            let renderedMarker = this._renderedMarkers[markerIndex];
-
-                            // Check if the latitude/longitude matches - cast to string of float precision (1e-12)
-                            if (renderedMarker.position.lat().toFixed(12) === removedObj.latitude.toFixed(12) &&
-                                renderedMarker.position.lng().toFixed(12) === removedObj.longitude.toFixed(12)) {
-                                // Set the map to null;
-                                renderedMarker.setMap(null);
-
-                                // Splice out this rendered marker as well
-                                this._renderedMarkers.splice((<any>markerIndex), 1);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Add the new markers to the map
-            if (splice.addedCount) {
-                let addedMarkers = this.markers.slice(-splice.addedCount);
-
-                Promise.all(addedMarkers.map(am => {
-                                return isAddressMarker(am) ? this.addressMarkerToMarker(am) : am;
-                            })
-                ).then(result => {
-                           Promise.all(result.map((r: LatLongMarker) => {
-                               return this.renderMarker(r);
-                           })).then(() => {
-                               this.taskQueue.queueTask(() => {
-                                   this.zoomToMarkerBounds();
-                               });
-                           });
-                       }
-                );
-            }
-        }
+        Promise.all(this.markers.map(am => {
+                        return isAddressMarker(am) ? this.addressMarkerToMarker(am) : am;
+                    })
+        ).then(result => {
+                   Promise.all(result.map((r: LatLongMarker) => {
+                       return this.renderMarker(r);
+                   })).then(() => {
+                       this.taskQueue.queueTask(() => {
+                           this.zoomToMarkerBounds();
+                       });
+                   });
+               }
+        );
 
         /**
          * We queue up a task to update the bounds, because in the case of multiple bound properties changing all at once,
